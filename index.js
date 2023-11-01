@@ -60,6 +60,28 @@ async function run() {
         const result = await ordersCollection.insertOne(order)
         res.send(result)
     })
+      // order, delete endpoint
+      app.delete("/orders/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await ordersCollection.deleteOne(query);
+        res.send(result);
+      });
+
+       // order, patch endpoint
+    app.patch("/orders/:id", async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const updateOrder = req.body
+      const updatedDoc = {
+          $set: {
+              status: updateOrder.status
+          }
+      }
+      const result = await ordersCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+  })
+
 
 
     // Send a ping to confirm a successful connection
