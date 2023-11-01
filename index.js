@@ -67,7 +67,6 @@ async function run() {
         const result = await ordersCollection.deleteOne(query);
         res.send(result);
       });
-
        // order, patch endpoint
     app.patch("/orders/:id", async(req, res)=>{
       const id = req.params.id;
@@ -81,6 +80,7 @@ async function run() {
       const result = await ordersCollection.updateOne(filter, updatedDoc)
       res.send(result)
   })
+      
 
 
 
