@@ -9,6 +9,15 @@ const port = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
+app.use(
+  cors({
+    origin: ["http://localhost:5173/"],
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(cookieParser())
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wzxk65v.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -29,6 +38,23 @@ async function run() {
     const servicesCollection = client.db("carDoctorDB").collection("services")
     // order collection
     const ordersCollection = client.db("carDoctorDB").collection("orders")
+
+        // auth related api
+        app.post("/jwt", async (req, res) => {
+          const user = req.body;
+          const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: '1h',
+          });
+    
+          res
+          .cookie('token', token, {
+            httpOnly:true,
+            secure:false,
+    
+          })
+          .send({success:true})
+    
+        });
 
     // get services endpoint
     app.get("/services", async(req, res)=>{
