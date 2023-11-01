@@ -1,17 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 //middleware
 app.use(cors());
 app.use(express.json());
-
-console.log(process.env.DB_PASS)
-
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wzxk65v.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -29,12 +25,40 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const servicesCollection = client.db('carDoctor').collection('services');
-    app.get('/services', async(req,res) =>{
-        const cursor = servicesCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
+    // service collection
+    const servicesCollection = client.db("carDoctorDB").collection("services")
+    // order collection
+    const ordersCollection = client.db("carDoctorDB").collection("orders")
 
+    // get services endpoint
+    app.get("/services", async(req, res)=>{
+        const cursor = servicesCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+    // get a single service
+    app.get("/services/:id", async(req, res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await servicesCollection.findOne(query)
+        res.send(result)
+    })
+
+    // get endpoint of orders
+    app.get("/orders", async(req, res)=>{
+        let query = {};
+        if(req.query?.email){
+            query = {email: req.query.email}
+        }
+        const result = await ordersCollection.find(query).toArray()
+        res.send(result)
+    })
+
+    // post a order by user, POST endpoint
+    app.post("/orders", async(req, res)=>{
+        const order = req.body;
+        const result = await ordersCollection.insertOne(order)
+        res.send(result)
     })
 
 
