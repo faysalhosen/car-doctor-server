@@ -29,6 +29,26 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+// middlewares
+const verifyToken = (req, res, next)=>{
+  const token = req.cookies?.token;
+  console.log("value of token in middleware", token)
+  if(!token){
+      return res.status(401).send({message: "unauthorized"})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
+      //error
+      if(error){
+          return res.status(401),send({message: "unauthorized"})
+      }
+      // if token is valid then it would be decoded
+      req.user = decoded;
+      next()
+  })
+
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
